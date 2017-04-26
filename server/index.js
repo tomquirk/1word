@@ -1,27 +1,14 @@
-const WebSocket = require('ws')
+const conn = require('./connection')
 
-const wss = new WebSocket.Server({ port: 3000 })
-
-let connPool = []
-
-wss.broadcast = function broadcast(data) {
-  wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ action: 'MESSAGE', data }))
-    }
-  })
+/**
+ * Recursive function that broadcasts current turn and initiates next turn
+ */
+function notifyTurn() {
+  setTimeout(() => {
+    const currentTurnId = conn.dequeueTurn()
+    conn.wss.broadcast({ action: 'TURN', data: { userId: currentTurnId } })
+    notifyTurn()
+  }, 3000)
 }
 
-wss.on('connection', function connection(ws) {
-  connPool.push(ws)
-  const clientId = connPool.length - 1
-  ws.send(JSON.stringify({ action: 'INIT', data: { client: { id: clientId } } }))
-
-  ws.on('message', function incoming(data) {
-    wss.broadcast(JSON.parse(data))
-  })
-
-  ws.on('close', function() {
-    connPool.splice(clientId, 1)
-  })
-})
+notifyTurn()
