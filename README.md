@@ -1,21 +1,21 @@
-# our-story
+# 1Word
 
-> A Vue.js project
+> A 1 Word Story Game
 
-## Build Setup
+1Word is a 1 word story game where players take turns in adding a single word to a story.
 
-``` bash
-# install dependencies
-npm install
+1Word is implemented with Node.js, Websockets, Redis (tbc) and Vue.js
 
-# serve with hot reload at localhost:8080
-npm run dev
+## Setup
 
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
+1. Start the websocket server 
+```
+node server
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+2. Start the Vue-js 
+```
+npm run dev
+```
+
+3. Open a couple of browser tabs and start writing!
