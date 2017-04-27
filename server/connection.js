@@ -1,5 +1,5 @@
 const WebSocket = require('ws')
-const uuid = require('uuid/v4')
+const stories = require('./db').stories
 
 let connPool = {}
 let turnQueue = []
@@ -16,19 +16,24 @@ wss.broadcast = function broadcast(message) {
 
 wss.on('connection', function connection(ws) {
   let connId = 0
-  // connPool[connId] = ws
-
-  // // send user their ID
-  // ws.send(JSON.stringify({ action: 'INIT', data: { client: { id: connId } } }))
 
   ws.on('message', function incoming(message) {
     const messageObj = JSON.parse(message)
     if (messageObj.action === 'INIT') {
-      connId = messageObj.data.client.id
-      console.log('User connected: ', connId)
+      connId = messageObj.data.clientId
+      console.log('User connected: ', connId, ' :: ', messageObj.data.storyId)
       enqueueTurn(connId)
+      const story = stories[messageObj.data.storyId]
+      story.id = messageObj.data.storyId
+      ws.send(JSON.stringify({ action: 'STORY', data: story }))
     } else {
-      wss.broadcast({ action: 'MESSAGE', data: messageObj.data })
+      const data = {
+        text: messageObj.data.word,
+        userId: connId
+      }
+      if (turnQueue[0] === connId) {
+        wss.broadcast({ action: 'MESSAGE', data })
+      }
     }
   })
 

@@ -1,16 +1,25 @@
+import * as myws from '@/myws'
+
 export default {
   name: 'chat',
   data() {
     return {
-      msg: '',
-      messages: window.messageStream,
+      word: '',
+      story: window.world.story,
       user: window.world.user,
       currentTurn: window.world.currentTurn
     }
   },
   methods: {
-    send(msg, user) {
-      window.myws.send(JSON.stringify({ action: 'MESSAGE', data: { msg, user } }))
+    send(word, user) {
+      window.myws.send(JSON.stringify({ action: 'MESSAGE', data: { word, user } }))
+    },
+    connectTo(storyId) {
+      const payload = {
+        clientId: this.user.id,
+        storyId
+      }
+      myws.connect(payload)
     }
   }
 }
