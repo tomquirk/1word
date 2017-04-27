@@ -26,6 +26,8 @@ wss.on('connection', function connection(ws) {
     const messageObj = JSON.parse(message)
     console.log(messageObj)
     const storyId = messageObj.data.storyId
+    const story = stories.find(s => s.id === storyId)
+    console.log(story)
 
     if (messageObj.action === 'INIT') {
       connId = messageObj.data.clientId
@@ -38,7 +40,6 @@ wss.on('connection', function connection(ws) {
         turnLoop(storyId, queue)
       }
 
-      const story = stories.find(s => s.id === storyId)
       ws.send(JSON.stringify({ action: 'STORY', data: story }))
     } else {
       const data = {
@@ -48,6 +49,7 @@ wss.on('connection', function connection(ws) {
       // check if its this users turn
       if (queue[0] === connId) {
         wss.broadcast(storyId, { action: 'MESSAGE', data })
+        story.words.push(data)
       }
     }
   })
