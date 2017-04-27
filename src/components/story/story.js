@@ -1,7 +1,7 @@
 import * as myws from '@/myws'
 
 export default {
-  name: 'chat',
+  name: 'story',
   data() {
     return {
       word: '',
@@ -21,5 +21,8 @@ export default {
       }
       myws.connect(payload)
     }
+  },
+  created() {
+    this.connectTo(this.$route.params.id)
   }
 }

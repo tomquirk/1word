@@ -14,6 +14,10 @@ window.world = {
 // localStorage.setItem('_USER', JSON.stringify(window.world.user))
 
 export function connect(data) {
+  if (window.myws) {
+    window.myws.close()
+  }
+
   window.myws = new WebSocket('ws://localhost:3000')
 
   window.myws.onopen = function() {

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Chat from '@/components/chat/Chat.vue'
+import Story from '@/components/story/Story.vue'
+import Home from '@/components/home/Home.vue'
 
 Vue.use(Router)
 
@@ -8,8 +9,13 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Chat',
-      component: Chat
+      name: 'Home',
+      component: Home
+    },
+    {
+      path: '/story/:id',
+      name: 'Story',
+      component: Story
     }
   ]
 })

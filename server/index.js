@@ -33,6 +33,11 @@ wss.on('connection', function connection(ws) {
       connPool[storyId][connId] = ws
       queue = turnQueue[storyId]
       enqueueTurn(queue, connId)
+
+      if (queue.length === 1) {
+        turnLoop(storyId, queue)
+      }
+
       const story = stories.find(s => s.id === storyId)
       ws.send(JSON.stringify({ action: 'STORY', data: story }))
     } else {
@@ -64,18 +69,18 @@ function dequeueTurn(queue) {
   }
 
   const element = queue.splice(0, 1)
-  enqueueTurn(element[0])
+  enqueueTurn(queue, element[0])
   return queue[0]
 }
 
 /**
  * Recursive function that broadcasts current turn and initiates next turn
  */
-function turnLoop() {
+function turnLoop(storyId, queue) {
   setTimeout(() => {
-    const currentTurnId = dequeueTurn()
-    wss.broadcast({ action: 'TURN', data: { userId: currentTurnId } })
-    turnLoop()
+    const currentTurnId = dequeueTurn(queue)
+    wss.broadcast(storyId, { action: 'TURN', data: { userId: currentTurnId } })
+    turnLoop(storyId, queue)
   }, 3000)
 }
 
