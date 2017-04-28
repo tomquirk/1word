@@ -9,7 +9,8 @@ window.world = {
     name: null,
     id: null,
     words: []
-  }
+  },
+  users: []
 }
 // localStorage.setItem('_USER', JSON.stringify(window.world.user))
 
@@ -27,18 +28,34 @@ export function connect(data) {
   }
 
   window.myws.onerror = function(err) {
-    console.error(err)
+    console.error('WS ERROR::', err)
   }
 
   window.myws.onmessage = function(message) {
     const messageObj = JSON.parse(message.data)
-    if (messageObj.action === 'TURN') {
-      window.world.currentTurn.userId = messageObj.data.userId
-    } else if (messageObj.action === 'STORY') {
-      console.log(messageObj)
-      Object.assign(window.world.story, messageObj.data)
-    } else {
-      window.world.story.words.push(messageObj.data)
+    console.log(messageObj.action)
+    switch (messageObj.action) {
+      case ('TURN'):
+        window.world.currentTurn.userId = messageObj.data.userId
+        break
+
+      case ('USER_UPDATE'):
+        let user = window.world.users.find(u => u.id === message.data.id)
+        if (user) {
+          Object.assign(user, messageObj.data)
+        } else {
+          window.world.users.push(messageObj.data)
+        }
+        break
+
+      case ('STORY'):
+        console.log(messageObj)
+        Object.assign(window.world.story, messageObj.data)
+        break
+
+      case ('MESSAGE'):
+        window.world.story.words.push(messageObj.data)
+        break
     }
   }
 }

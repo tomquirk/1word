@@ -3,16 +3,23 @@
   <section>
 
     <div id="sidebar">
-      <h2>{{currentTurn.userId === user.id ? 'ITS YOUR TURN!' : 'WAIT YOUR TURN!'}}</h2>
-      <small>{{user.id}}</small>
-      <form @submit.prevent="send(word, user)">
+      <h1>{{world.story.name}}</h1>
+      <!--<h2>{{currentTurn.userId === user.id ? 'ITS YOUR TURN!' : 'WAIT YOUR TURN!'}}</h2>-->
+      <form @submit.prevent="send(word, world.user)">
         <input type="text" v-model="word">
         <button>Add To Story</button>
       </form>
+      <label for="showMyWords">Show my words</label>
+      <input type="checkbox" v-model="showMyWords">
+
+      <h1>Writers</h1>
+      <div class="user-label" v-for="user in Object.values(world.users)">
+        {{user.name}}
+      </div>
     </div>
 
     <div id="story">
-      <span v-for="word in story.words">{{word.text}} </span>
+      <span v-for="word in world.story.words" :class="{ 'highlight': showMyWords && word.userId === user.id }">{{word.text}} </span>
     </div>
 
   </section>

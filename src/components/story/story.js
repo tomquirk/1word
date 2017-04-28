@@ -5,9 +5,8 @@ export default {
   data() {
     return {
       word: '',
-      story: window.world.story,
-      user: window.world.user,
-      currentTurn: window.world.currentTurn
+      showMyWords: false,
+      world: window.world
     }
   },
   methods: {
@@ -16,7 +15,7 @@ export default {
     },
     connectTo(storyId) {
       const payload = {
-        clientId: this.user.id,
+        clientId: this.world.user.id,
         storyId
       }
       myws.connect(payload)

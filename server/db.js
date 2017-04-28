@@ -1,14 +1,3 @@
-// var redis = require('redis')
-// var client = redis.createClient(port, 'hostname', { no_ready_check: true })
-// client.auth('password', function(err) {
-//   if (err) throw err
-// })
-
-// client.on('connect', function() {
-//   console.log('Connected to Redis')
-// })
-
-
 const stories = [
   {
     id: '11',

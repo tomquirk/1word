@@ -1,6 +1,8 @@
 const WebSocket = require('ws')
 const stories = require('./db').stories
 
+const colors = ['r', 'g', 'b']
+
 const turnQueue = {}
 const connPool = {}
 stories.forEach(s => {
@@ -18,6 +20,14 @@ wss.broadcast = function broadcast(storyId, message) {
   })
 }
 
+function createUser(id, queue) {
+  return {
+    id,
+    name: `User ${queue.length}`,
+    color: colors.filter(c => queue.map(e => e.color).indexOf(c) === -1)[0] || 'w'
+  }
+}
+
 wss.on('connection', function connection(ws) {
   let connId = 0
   let queue = []
@@ -25,32 +35,45 @@ wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     const messageObj = JSON.parse(message)
     console.log(messageObj)
-    const storyId = messageObj.data.storyId
-    const story = stories.find(s => s.id === storyId)
-    console.log(story)
+    const story = stories.find(s => s.id === messageObj.data.storyId)
 
-    if (messageObj.action === 'INIT') {
-      connId = messageObj.data.clientId
-      console.log('User connected: ', connId, ' :: ', storyId)
-      connPool[storyId][connId] = ws
-      queue = turnQueue[storyId]
-      enqueueTurn(queue, connId)
+    switch (messageObj.action) {
+      case ('INIT'):
+        connId = messageObj.data.clientId
+        console.log('User connected: ', connId, ' :: ', story.id)
+        connPool[story.id][connId] = ws
+        queue = turnQueue[story.id]
+        const user = createUser(connId, queue)
+        enqueueTurn(queue, user)
 
-      if (queue.length === 1) {
-        turnLoop(storyId, queue)
-      }
+        if (queue.length === 1) {
+          turnLoop(story.id, queue)
+        }
 
-      ws.send(JSON.stringify({ action: 'STORY', data: story }))
-    } else {
-      const data = {
-        text: messageObj.data.word,
-        userId: connId
-      }
-      // check if its this users turn
-      if (queue[0] === connId) {
-        wss.broadcast(storyId, { action: 'MESSAGE', data })
-        story.words.push(data)
-      }
+        ws.send(JSON.stringify({ action: 'STORY', data: story }))
+        queue.forEach(u => {
+          if (u.id !== connId) {
+            ws.send(JSON.stringify({ action: 'USER_UPDATE', data: u }))
+          }
+        })
+        wss.broadcast(story.id, { action: 'USER_UPDATE', data: user })
+        break
+
+      case ('USER_UPDATE'):
+        wss.broadcast(story.id, messageObj)
+        break
+
+      case ('MESSAGE'):
+        const data = {
+          text: messageObj.data.word,
+          userId: connId
+        }
+        // check if its this users turn
+        if (queue[0].id === connId) {
+          wss.broadcast(story.id, { action: 'MESSAGE', data })
+          story.words.push(data)
+        }
+        break
     }
   })
 
@@ -79,10 +102,9 @@ function dequeueTurn(queue) {
  * Recursive function that broadcasts current turn and initiates next turn
  */
 function turnLoop(storyId, queue) {
-  setTimeout(() => {
-    const currentTurnId = dequeueTurn(queue)
-    wss.broadcast(storyId, { action: 'TURN', data: { userId: currentTurnId } })
-    turnLoop(storyId, queue)
+  setInterval(() => {
+    const currentTurn = dequeueTurn(queue)
+    wss.broadcast(storyId, { action: 'TURN', data: { userId: currentTurn.id } })
   }, 3000)
 }
 
