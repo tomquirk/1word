@@ -20,7 +20,7 @@ export function connect(data) {
     window.myws.close()
   }
 
-  window.myws = new WebSocket('ws://localhost:3000')
+  window.myws = new WebSocket(`ws://${window.location.hostname}:3000`)
 
   window.myws.onopen = function() {
     console.info('connection established')
