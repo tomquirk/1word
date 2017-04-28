@@ -2,7 +2,8 @@ const uuid = require('uuid/v4')
 window.WebSocket = window.WebSocket || window.MozWebSocket
 window.world = {
   currentTurn: {
-    userId: null
+    userId: null,
+    timeRemaining: 0
   },
   user: JSON.parse(localStorage.getItem('_USER')) || { id: uuid() }, // eventually generate on REST
   story: {
@@ -37,6 +38,7 @@ export function connect(data) {
     switch (messageObj.action) {
       case ('TURN'):
         window.world.currentTurn.userId = messageObj.data.userId
+        window.world.currentTurn.timeRemaining = messageObj.data.timeRemaining
         break
 
       case ('USER_UPDATE'):

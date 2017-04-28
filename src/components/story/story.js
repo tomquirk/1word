@@ -11,7 +11,7 @@ export default {
   },
   methods: {
     send(word, user) {
-      window.myws.send(JSON.stringify({ action: 'MESSAGE', data: { word, user, storyId: this.story.id } }))
+      window.myws.send(JSON.stringify({ action: 'MESSAGE', data: { word, user, storyId: this.world.story.id } }))
     },
     connectTo(storyId) {
       const payload = {

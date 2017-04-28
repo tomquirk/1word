@@ -2,6 +2,7 @@ const WebSocket = require('ws')
 const stories = require('./db').stories
 
 const colors = ['r', 'g', 'b']
+const usernames = ['Waylon Smithers', 'Ned Kelly', 'Walter White']
 
 const turnQueue = {}
 const connPool = {}
@@ -23,7 +24,7 @@ wss.broadcast = function broadcast(storyId, message) {
 function createUser(id, queue) {
   return {
     id,
-    name: `User ${queue.length}`,
+    name: usernames.filter(u => queue.map(e => e.name).indexOf(u) === -1)[0] || 'Anon',
     color: colors.filter(c => queue.map(e => e.color).indexOf(c) === -1)[0] || 'w'
   }
 }
@@ -102,10 +103,17 @@ function dequeueTurn(queue) {
  * Recursive function that broadcasts current turn and initiates next turn
  */
 function turnLoop(storyId, queue) {
+  const interval = 5
+  let timeRemaining = interval // seconds
+
   setInterval(() => {
-    const currentTurn = dequeueTurn(queue)
-    wss.broadcast(storyId, { action: 'TURN', data: { userId: currentTurn.id } })
-  }, 3000)
+    wss.broadcast(storyId, { action: 'TURN', data: { userId: queue[0].id, timeRemaining } })
+    timeRemaining--
+    if (timeRemaining < 0) {
+      dequeueTurn(queue)
+      timeRemaining = interval
+    }
+  }, 1000)
 }
 
 module.exports = { wss, enqueueTurn, dequeueTurn }
