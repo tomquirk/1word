@@ -48,6 +48,11 @@ export function connect(data) {
         } else {
           window.world.users.push(messageObj.data)
         }
+
+        if (messageObj.data.id === window.world.user.id) {
+          Object.assign(window.world.user, messageObj.data)
+        }
+
         break
 
       case ('STORY'):

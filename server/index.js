@@ -1,7 +1,7 @@
 const WebSocket = require('ws')
 const stories = require('./db').stories
 
-const colors = ['r', 'g', 'b']
+const colors = ['#ffb4a8', '#ffcef7', '#d5ffd7']
 const usernames = ['Waylon Smithers', 'Ned Kelly', 'Walter White']
 
 const turnQueue = {}

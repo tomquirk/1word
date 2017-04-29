@@ -18,14 +18,14 @@
       <input type="checkbox" v-model="showMyWords">
 
       <h1>Writers</h1>
-      <div class="user-label" v-for="user in Object.values(world.users)">
-        {{user.name}}
+      <div class="user-label" :style="'background-color:' + user.color" v-for="user in Object.values(world.users)">
+        {{user.name}} <i v-if="user.id === world.user.id">(you)</i>
         <span v-if="user.id === world.currentTurn.userId && user.id !== world.user.id"> - {{world.currentTurn.timeRemaining}}</span>
       </div>
     </div>
 
     <div id="story">
-      <span v-for="word in world.story.words" :class="{ 'highlight': showMyWords && word.userId === world.user.id }">{{word.text}} </span>
+      <span v-for="word in world.story.words" :style="'background-color:' + (showMyWords && word.userId === world.user.id ? world.user.color : 'transparent')">{{word.text}} </span>
     </div>
 
   </section>
