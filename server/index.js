@@ -10,12 +10,13 @@ const TURN_DURATION = 5
 
 let timeRemaining = TURN_DURATION // global var for the current turn's remaining time
 
+const wss = new WebSocket.Server({ port: 3000 })
+
+/* Set a connection pool and turn queue for each story */
 stories.forEach(s => {
   connPool[s.id] = {}
   turnQueue[s.id] = []
 })
-
-const wss = new WebSocket.Server({ port: 3000 })
 
 wss.broadcast = function broadcast(storyId, message) {
   Object.values(connPool[storyId]).forEach(client => {
@@ -104,10 +105,15 @@ function dequeueTurn(queue) {
   return queue[0]
 }
 
+/**
+ * Immediately ends the current users turn and initiates the next turn
+ * @param {int} storyId - id of story
+ * @param {array} queue - turn queue for given story id
+ */
 function setNextTurn(storyId, queue) {
   dequeueTurn(queue)
   timeRemaining = TURN_DURATION
-  wss.broadcast(storyId, { action: 'TURN', data: { userId: queue[0].id, timeRemaining } })
+  wss.broadcast(storyId, { action: 'TURN', data: { userId: queue[0].id } })
 }
 
 /**

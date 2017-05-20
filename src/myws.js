@@ -38,7 +38,8 @@ export function connect(data) {
     switch (messageObj.action) {
       case ('TURN'):
         window.world.currentTurn.userId = messageObj.data.userId
-        window.world.currentTurn.timeRemaining = messageObj.data.timeRemaining
+        window.world.currentTurn.timeRemaining = messageObj.data.timeRemaining ||
+          (messageObj.data.userId === window.world.user.id ? 'YOUR TURN' : 0)
         break
 
       case ('USER_UPDATE'):
