@@ -6,6 +6,10 @@ const usernames = ['Waylon Smithers', 'Ned Kelly', 'Walter White']
 
 const turnQueue = {}
 const connPool = {}
+const TURN_DURATION = 5
+
+let timeRemaining = TURN_DURATION // global var for the current turn's remaining time
+
 stories.forEach(s => {
   connPool[s.id] = {}
   turnQueue[s.id] = []
@@ -73,6 +77,7 @@ wss.on('connection', function connection(ws) {
         if (queue[0].id === connId) {
           wss.broadcast(story.id, { action: 'MESSAGE', data })
           story.words.push(data)
+          setNextTurn(story.id, queue)
         }
         break
     }
@@ -99,19 +104,21 @@ function dequeueTurn(queue) {
   return queue[0]
 }
 
+function setNextTurn(storyId, queue) {
+  dequeueTurn(queue)
+  timeRemaining = TURN_DURATION
+  wss.broadcast(storyId, { action: 'TURN', data: { userId: queue[0].id, timeRemaining } })
+}
+
 /**
  * Recursive function that broadcasts current turn and initiates next turn
  */
 function turnLoop(storyId, queue) {
-  const interval = 5
-  let timeRemaining = interval // seconds
-
   setInterval(() => {
     wss.broadcast(storyId, { action: 'TURN', data: { userId: queue[0].id, timeRemaining } })
     timeRemaining--
     if (timeRemaining < 0) {
-      dequeueTurn(queue)
-      timeRemaining = interval
+      setNextTurn(storyId, queue)
     }
   }, 1000)
 }
